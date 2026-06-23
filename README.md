@@ -53,6 +53,14 @@ Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
 - `npm run preview`: Previews the production build locally.
 - `npm run deploy`: Builds the app and deploys it to GitHub Pages.
 
+## GitHub Pages Deployment
+
+This Vite app must be served from the built `dist` artifact. In GitHub repo
+settings, set **Pages > Build and deployment > Source** to **GitHub Actions**.
+If Pages is set to deploy from the `main` branch root, GitHub will serve the
+development `index.html` and the browser will try to load `/src/main.tsx`,
+which fails in production.
+
 ## Cloud Sync Setup (Optional)
 
 If you want to sync your skills across devices, you can set up a Supabase project and connect it in the app:
