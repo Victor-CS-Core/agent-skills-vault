@@ -1754,9 +1754,17 @@
         }
 
         if (hostname === "skills.sh" || hostname === "www.skills.sh") {
-          // skills.sh/owner/repo
-          if (parts.length >= 2)
-            return { type: "repo", owner: parts[0], repo: parts[1] };
+          // skills.sh/owner/repo or skills.sh/owner/repo/skill-name
+          if (parts.length >= 2) {
+            const inferredFilter =
+              parts.length > 2 ? parts[parts.length - 1] : "";
+            return {
+              type: "repo",
+              owner: parts[0],
+              repo: parts[1],
+              inferredFilter,
+            };
+          }
           throw new Error("skills.sh URL needs owner/repo");
         }
 
@@ -1773,6 +1781,18 @@
           parts[parts.length - 2] ||
           parts[parts.length - 1].replace(/\.md$/i, "")
         );
+      }
+
+      function normalizeSkillFilter(filterRaw) {
+        let f = (filterRaw || "").trim().toLowerCase();
+        if (!f) return "";
+        f = f.replace(/^--?skill\s+/i, "");
+        f = f.replace(/^skill\s+/i, "");
+        if (f.includes("/")) {
+          const parts = f.split("/").filter(Boolean);
+          f = parts[parts.length - 1] || f;
+        }
+        return f.trim();
       }
 
       async function fetchRaw(owner, repo, path, branch = "main") {
@@ -1813,18 +1833,18 @@
           )
           .map((n) => n.path);
 
-        if (filter.trim()) {
-          const f = filter.trim().toLowerCase();
+        const normalizedFilter = normalizeSkillFilter(filter);
+        if (normalizedFilter) {
           paths = paths.filter(
             (p) =>
-              nameFromPath(p).toLowerCase() === f ||
-              nameFromPath(p).toLowerCase().includes(f),
+              nameFromPath(p).toLowerCase() === normalizedFilter ||
+              nameFromPath(p).toLowerCase().includes(normalizedFilter),
           );
         }
 
         if (paths.length === 0)
           throw new Error(
-            `No skills found in ${owner}/${repo}${filter ? ` matching "${filter}"` : ""}. Check the repo structure.`,
+            `No skills found in ${owner}/${repo}${normalizedFilter ? ` matching "${normalizedFilter}"` : ""}. Check the repo structure.`,
           );
 
         const results = [];
@@ -2489,7 +2509,9 @@
 
       async function doImport() {
         const raw = document.getElementById("url-input").value.trim();
-        const filter = document.getElementById("skill-filter").value.trim();
+        const filterInput = document
+          .getElementById("skill-filter")
+          .value.trim();
         if (!raw) {
           setStatus("error", "<span>⚠ Please enter a URL</span>");
           return;
@@ -2512,6 +2534,9 @@
           }
 
           let results = [];
+          const effectiveFilter =
+            normalizeSkillFilter(filterInput) ||
+            normalizeSkillFilter(parsed.inferredFilter || "");
 
           if (parsed.type === "raw") {
             setStatus(
@@ -2560,9 +2585,13 @@
           } else {
             setStatus(
               "loading",
-              `<div class="spinner"></div><span>Scanning ${esc(parsed.owner)}/${esc(parsed.repo)}…</span>`,
+              `<div class="spinner"></div><span>Scanning ${esc(parsed.owner)}/${esc(parsed.repo)}${effectiveFilter ? ` for ${esc(effectiveFilter)}` : ""}…</span>`,
             );
-            results = await importFromRepo(parsed.owner, parsed.repo, filter);
+            results = await importFromRepo(
+              parsed.owner,
+              parsed.repo,
+              effectiveFilter,
+            );
           }
 
           const ok = results.filter((r) => r.ok);
