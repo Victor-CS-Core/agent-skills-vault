@@ -139,7 +139,7 @@ export default function App() {
             <p>Import a repository or save a markdown skill to start the vault.</p>
           </section>
         ) : (
-          <section className={`grid ${viewMode}`}>
+          <section className={`grid-${viewMode}`}>
             {sortedSkills.map((skill) => (
               <SkillCard
                 key={skill.id}

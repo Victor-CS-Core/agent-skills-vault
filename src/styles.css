@@ -257,13 +257,13 @@ textarea {
   font-weight: 800;
 }
 
-.grid.card {
+.grid-card {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(274px, 1fr));
   gap: 12px;
 }
 
-.grid.list {
+.grid-list {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
@@ -303,7 +303,7 @@ textarea {
   letter-spacing: 0.18em;
 }
 
-.grid.list .card {
+.grid-list .card {
   min-height: 120px;
 }
 
