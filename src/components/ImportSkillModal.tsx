@@ -42,7 +42,17 @@ export default function ImportSkillModal({
   return (
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Import Skill</h2>
+        <div className="modal-head">
+          <h2>Import Skill</h2>
+          <button
+            type="button"
+            className="icon"
+            onClick={onClose}
+            aria-label="Close import modal"
+          >
+            ×
+          </button>
+        </div>
         <label>GitHub or skills.sh URL</label>
         <input
           value={repoUrl}
@@ -55,7 +65,11 @@ export default function ImportSkillModal({
           onChange={(e) => onSkillFilterChange(e.target.value)}
           placeholder="to-prd"
         />
-        <button className="btn full" onClick={() => void onImport()}>
+        <button
+          type="button"
+          className="btn full"
+          onClick={() => void onImport()}
+        >
           Fetch and Import
         </button>
 
@@ -90,7 +104,11 @@ export default function ImportSkillModal({
           rows={5}
           placeholder="Skill markdown body"
         />
-        <button className="btn ghost full" onClick={() => void onManualSave()}>
+        <button
+          type="button"
+          className="btn ghost full"
+          onClick={() => void onManualSave()}
+        >
           Save Manually
         </button>
         {importStatus && <p className="notice">{importStatus}</p>}

@@ -38,7 +38,17 @@ export default function CloudSyncModal({
   return (
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Cloud Sync</h2>
+        <div className="modal-head">
+          <h2>Cloud Sync</h2>
+          <button
+            type="button"
+            className="icon"
+            onClick={onClose}
+            aria-label="Close cloud modal"
+          >
+            ×
+          </button>
+        </div>
         <label>Supabase URL</label>
         <input
           value={cloudUrl}
@@ -58,14 +68,23 @@ export default function CloudSyncModal({
           placeholder="you@example.com"
         />
 
-        <div className="row">
-          <button className="btn" onClick={() => void onSaveConfig()}>
+        <div className="row-3">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => void onSaveConfig()}
+          >
             Save
           </button>
-          <button className="btn ghost" onClick={() => void onSendMagicLink()}>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => void onSendMagicLink()}
+          >
             Send Magic Link
           </button>
           <button
+            type="button"
             className="btn ghost"
             onClick={() => void onSync()}
             disabled={!canSync || cloudSyncing}
@@ -75,11 +94,19 @@ export default function CloudSyncModal({
         </div>
 
         <div className="row">
-          <button className="btn ghost" onClick={() => void onClearConfig()}>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => void onClearConfig()}
+          >
             Clear Config
           </button>
           {showSignOut && (
-            <button className="btn ghost" onClick={() => void onSignOut()}>
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => void onSignOut()}
+            >
               Sign Out
             </button>
           )}

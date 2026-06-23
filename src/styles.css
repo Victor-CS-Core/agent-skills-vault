@@ -73,6 +73,16 @@ body {
   color: var(--text);
 }
 
+.search:focus-visible,
+.modal input:focus-visible,
+.modal textarea:focus-visible,
+.btn:focus-visible,
+.icon:focus-visible,
+.segmented button:focus-visible {
+  outline: 2px solid rgba(124, 58, 237, 0.65);
+  outline-offset: 2px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -84,6 +94,10 @@ body {
 .status {
   color: var(--muted);
   font-size: 12px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .btn {
@@ -206,11 +220,16 @@ body {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .meta {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
   font-size: 12px;
@@ -227,18 +246,21 @@ body {
 .overlay {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px);
   padding: 14px;
   z-index: 100;
+  overflow-y: auto;
 }
 
 .modal {
   width: min(760px, 100%);
   max-height: min(92vh, 900px);
   overflow: auto;
+  overscroll-behavior: contain;
   border-radius: 16px;
   border: 1px solid var(--border);
   background: #0b0b15;
@@ -247,6 +269,17 @@ body {
 
 .modal h2,
 .modal h3 {
+  margin: 6px 0 10px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.modal-head h2 {
   margin: 6px 0 10px;
 }
 
@@ -270,6 +303,12 @@ body {
   gap: 8px;
 }
 
+.row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .notice {
   margin-top: 8px;
   color: #a5b4fc;
@@ -285,6 +324,11 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.detail-head h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .detail-meta {
@@ -310,13 +354,35 @@ body {
   font-family: "JetBrains Mono", monospace;
 }
 
+.markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.related-skills {
+  margin-top: 16px;
+}
+
+.related-skills ul {
+  padding-left: 20px;
+}
+
 @media (max-width: 980px) {
   .header {
     grid-template-columns: 1fr;
+    padding: 12px 14px;
   }
 
   .header-actions {
     justify-content: flex-start;
+    width: 100%;
+  }
+
+  .status {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
   }
 }
 
@@ -326,7 +392,8 @@ body {
   }
 
   .row,
-  .row-2 {
+  .row-2,
+  .row-3 {
     grid-template-columns: 1fr;
   }
 
@@ -335,11 +402,109 @@ body {
   .search,
   .modal input,
   .modal textarea {
-    min-height: 42px;
+    min-height: 44px;
+    font-size: 16px;
   }
 
   .toolbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .overlay {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 14px;
+    margin-top: 8px;
+  }
+
+  .modal-head .icon {
+    flex: 0 0 auto;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .header {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .brand {
+    font-size: 15px;
+  }
+
+  .status {
+    font-size: 11px;
+  }
+
+  .main {
+    padding: 10px;
+  }
+
+  .toolbar {
+    gap: 8px;
+  }
+
+  .segmented {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .segmented button {
+    width: 100%;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .grid.card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .card h3 {
+    font-size: 15px;
+  }
+
+  .meta {
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 11px;
+  }
+
+  .overlay {
+    padding: 6px;
+  }
+
+  .modal {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .modal-head h2,
+  .detail-head h2 {
+    font-size: 18px;
+  }
+
+  .detail-meta {
+    font-size: 12px;
+  }
+
+  .markdown {
+    line-height: 1.65;
   }
 }
