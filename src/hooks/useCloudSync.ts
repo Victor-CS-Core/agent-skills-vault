@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
-import { CLOUD_CFG_KEY, CLOUD_SYNC_DEBOUNCE_MS, CLOUD_TABLE } from "../lib/constants";
+import { CLOUD_CFG_KEY, CLOUD_SYNC_DEBOUNCE_MS } from "../lib/constants";
 import {
+  addPendingCloudDeleteKey,
   clearCloudDirty,
-  fromCloudRow,
+  clearPendingCloudDeleteKeys,
   hasPendingCloudChanges,
   loadCloudConfig,
-  toCloudRow,
+  loadPendingCloudDeleteKeys,
+  removePendingCloudDeleteKey,
 } from "../lib/cloud";
-import { storeGetAll, storeReplaceAll } from "../lib/storage";
-import { normalizeSkill, skillKey } from "../lib/skill-utils";
+import { skillKey } from "../lib/skill-utils";
+import { runSyncEngine } from "../lib/sync-engine";
+import {
+  createSkillRepositoryAdapter,
+  createSupabaseCloudSkillsAdapter,
+  removeCloudSkillByKey,
+} from "../lib/cloud-sync-adapters";
+import { useCloudSyncLifecycle } from "./useCloudSyncLifecycle";
 import type { CloudConfig, Skill } from "../types/skill";
 
 type UseCloudSyncOptions = {
@@ -88,40 +96,13 @@ export function useCloudSync({ onSkillsUpdated }: UseCloudSyncOptions = {}) {
     setSyncTimer(id);
   }
 
-  useEffect(() => {
-    const triggerCloseSync = () => {
-      if (!cloudUser || !cloudClient || cloudSyncing) return;
-      if (!hasPendingCloudChanges()) return;
-      void syncWithCloud();
-    };
-
-    const beforeUnload = (e: BeforeUnloadEvent) => {
-      if (!cloudUser || !cloudClient) return;
-      if (!hasPendingCloudChanges()) return;
-      e.preventDefault();
-      e.returnValue = "";
-    };
-
-    const online = () => {
-      if (hasPendingCloudChanges()) queueCloudSync(0);
-    };
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") triggerCloseSync();
-    };
-
-    window.addEventListener("beforeunload", beforeUnload);
-    window.addEventListener("pagehide", triggerCloseSync);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("online", online);
-
-    return () => {
-      window.removeEventListener("beforeunload", beforeUnload);
-      window.removeEventListener("pagehide", triggerCloseSync);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("online", online);
-    };
-  }, [cloudUser, cloudClient, cloudSyncing]);
+  useCloudSyncLifecycle({
+    enabled: Boolean(cloudUser && cloudClient),
+    cloudSyncing,
+    hasPendingChanges: hasPendingCloudChanges,
+    queueCloudSync,
+    syncWithCloud,
+  });
 
   async function saveCloudConfig() {
     const next = { url: cloudUrl.trim(), anonKey: cloudAnon.trim() };
@@ -167,65 +148,42 @@ export function useCloudSync({ onSkillsUpdated }: UseCloudSyncOptions = {}) {
     setCloudUser(null);
   }
 
-  async function fetchCloudSkills() {
-    if (!cloudClient || !cloudUser) return [] as Skill[];
-    const { data, error } = await cloudClient
-      .from(CLOUD_TABLE)
-      .select("*")
-      .eq("user_id", cloudUser.id);
-    if (error) throw error;
-    return (data ?? []).map((row) => fromCloudRow(row as Record<string, unknown>));
-  }
-
-  async function pushSkillsToCloud(items: Skill[]) {
-    if (!cloudClient || !cloudUser || items.length === 0) return;
-    const payload = items.map((s) => toCloudRow(s, cloudUser.id));
-    const { error } = await cloudClient.from(CLOUD_TABLE).upsert(payload, {
-      onConflict: "user_id,skill_key",
-      ignoreDuplicates: true,
-    });
-    if (error) throw error;
-  }
-
   async function removeCloudSkill(skill: Skill) {
+    const key = skillKey(skill);
+    addPendingCloudDeleteKey(key);
+
     if (!cloudClient || !cloudUser) return;
-    const { error } = await cloudClient
-      .from(CLOUD_TABLE)
-      .delete()
-      .eq("user_id", cloudUser.id)
-      .eq("skill_key", skillKey(skill));
-    if (error) throw error;
+
+    try {
+      await removeCloudSkillByKey(cloudClient, cloudUser, skill);
+      removePendingCloudDeleteKey(key);
+    } catch {
+      // keep the key queued for the next sync plan
+    }
   }
 
   async function syncWithCloud() {
     if (!cloudClient || !cloudUser || cloudSyncing) return;
     setCloudSyncing(true);
     try {
-      const localSkills = (await storeGetAll()).map(normalizeSkill);
-      const remoteSkills = await fetchCloudSkills();
-      const remoteKeys = new Set(remoteSkills.map((s) => skillKey(s)));
+      const repositoryAdapter = createSkillRepositoryAdapter();
+      const cloudSkillsAdapter = createSupabaseCloudSkillsAdapter(
+        cloudClient,
+        cloudUser,
+      );
 
-      const merged = new Map<string, Skill>();
-      for (const s of remoteSkills) merged.set(skillKey(s), s);
-      for (const s of localSkills) {
-        const k = skillKey(s);
-        if (!merged.has(k)) {
-          merged.set(k, s);
-          continue;
-        }
-        const current = merged.get(k)!;
-        if (new Date(s.addedAt).getTime() > new Date(current.addedAt).getTime()) {
-          merged.set(k, s);
-        }
-      }
+      const pendingDeleteKeys = loadPendingCloudDeleteKeys();
 
-      const mergedSkills = [...merged.values()];
-      await storeReplaceAll(mergedSkills);
+      const { mergedSkills, syncPlan } = await runSyncEngine(
+        repositoryAdapter,
+        cloudSkillsAdapter,
+        { pendingDeleteKeys },
+      );
+
       onSkillsUpdated?.(mergedSkills);
 
-      const localOnly = localSkills.filter((s) => !remoteKeys.has(skillKey(s)));
-      await pushSkillsToCloud(localOnly);
       clearCloudDirty();
+      clearPendingCloudDeleteKeys(syncPlan.deleteCloudKeys);
       setCloudModalStatus("Cloud sync completed.");
       return mergedSkills;
     } catch (error) {

@@ -1,5 +1,9 @@
 import type { CloudConfig, Skill } from "../types/skill";
-import { CLOUD_CFG_KEY, CLOUD_DIRTY_KEY } from "./constants";
+import {
+  CLOUD_CFG_KEY,
+  CLOUD_DIRTY_KEY,
+  CLOUD_PENDING_DELETE_KEYS,
+} from "./constants";
 import { normalizeSkill, skillKey } from "./skill-utils";
 
 export function toCloudRow(skill: Skill, userId: string) {
@@ -45,7 +49,9 @@ export function loadCloudConfig(): CloudConfig {
 
 export function hasPendingCloudChanges() {
   try {
-    return localStorage.getItem(CLOUD_DIRTY_KEY) === "1";
+    if (localStorage.getItem(CLOUD_DIRTY_KEY) === "1") return true;
+    const pendingDeletes = loadPendingCloudDeleteKeys();
+    return pendingDeletes.length > 0;
   } catch {
     return false;
   }
@@ -62,6 +68,65 @@ export function markCloudDirty() {
 export function clearCloudDirty() {
   try {
     localStorage.removeItem(CLOUD_DIRTY_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export function loadPendingCloudDeleteKeys() {
+  try {
+    const raw = localStorage.getItem(CLOUD_PENDING_DELETE_KEYS);
+    if (!raw) return [] as string[];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [] as string[];
+    return parsed
+      .map((item) => String(item || "").trim())
+      .filter((item) => item.length > 0);
+  } catch {
+    return [] as string[];
+  }
+}
+
+export function addPendingCloudDeleteKey(skillKeyValue: string) {
+  const nextKey = skillKeyValue.trim();
+  if (!nextKey) return;
+  try {
+    const keys = new Set(loadPendingCloudDeleteKeys());
+    keys.add(nextKey);
+    localStorage.setItem(CLOUD_PENDING_DELETE_KEYS, JSON.stringify([...keys]));
+  } catch {
+    // ignore
+  }
+}
+
+export function removePendingCloudDeleteKey(skillKeyValue: string) {
+  try {
+    const keys = new Set(loadPendingCloudDeleteKeys());
+    keys.delete(skillKeyValue);
+    localStorage.setItem(CLOUD_PENDING_DELETE_KEYS, JSON.stringify([...keys]));
+  } catch {
+    // ignore
+  }
+}
+
+export function clearPendingCloudDeleteKeys(keysToClear?: string[]) {
+  try {
+    if (!keysToClear || keysToClear.length === 0) {
+      localStorage.removeItem(CLOUD_PENDING_DELETE_KEYS);
+      return;
+    }
+
+    const current = new Set(loadPendingCloudDeleteKeys());
+    for (const key of keysToClear) {
+      current.delete(key);
+    }
+
+    if (current.size === 0) {
+      localStorage.removeItem(CLOUD_PENDING_DELETE_KEYS);
+      return;
+    }
+
+    localStorage.setItem(CLOUD_PENDING_DELETE_KEYS, JSON.stringify([...current]));
   } catch {
     // ignore
   }
