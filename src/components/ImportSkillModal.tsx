@@ -43,7 +43,7 @@ export default function ImportSkillModal({
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <h2>Import Skill</h2>
+          <h2>Import skill</h2>
           <button
             type="button"
             className="icon"
@@ -59,7 +59,7 @@ export default function ImportSkillModal({
           onChange={(e) => onRepoUrlChange(e.target.value)}
           placeholder="https://github.com/owner/repo"
         />
-        <label>Skill filter (optional)</label>
+        <label>Skill filter</label>
         <input
           value={skillFilter}
           onChange={(e) => onSkillFilterChange(e.target.value)}
@@ -70,13 +70,13 @@ export default function ImportSkillModal({
           className="btn full"
           onClick={() => void onImport()}
         >
-          Fetch and Import
+          Fetch skills
         </button>
 
         <hr />
 
         <h3>Add manually</h3>
-        <label>Skill Name</label>
+        <label>Skill name</label>
         <input
           value={manualName}
           onChange={(e) => onManualNameChange(e.target.value)}
@@ -106,7 +106,7 @@ export default function ImportSkillModal({
             />
           </div>
         </div>
-        <label>Skill Markdown Body</label>
+        <label>Skill markdown</label>
         <textarea
           value={manualBody}
           onChange={(e) => onManualBodyChange(e.target.value)}
@@ -118,7 +118,7 @@ export default function ImportSkillModal({
           className="btn ghost full"
           onClick={() => void onManualSave()}
         >
-          Save Manually
+          Save manual skill
         </button>
         {importStatus && <p className="notice">{importStatus}</p>}
       </div>

@@ -39,7 +39,7 @@ export default function CloudSyncModal({
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <h2>Cloud Sync</h2>
+          <h2>Cloud sync</h2>
           <button
             type="button"
             className="icon"
@@ -68,20 +68,20 @@ export default function CloudSyncModal({
           placeholder="you@example.com"
         />
 
-        <div className="row-3">
+        <div className="cloud-actions cloud-actions-primary">
           <button
             type="button"
             className="btn"
             onClick={() => void onSaveConfig()}
           >
-            Save
+            Save config
           </button>
           <button
             type="button"
             className="btn ghost"
             onClick={() => void onSendMagicLink()}
           >
-            Send Magic Link
+            Send magic link
           </button>
           <button
             type="button"
@@ -93,13 +93,13 @@ export default function CloudSyncModal({
           </button>
         </div>
 
-        <div className="row">
+        <div className="cloud-actions cloud-actions-secondary">
           <button
             type="button"
             className="btn ghost"
             onClick={() => void onClearConfig()}
           >
-            Clear Config
+            Clear config
           </button>
           {showSignOut && (
             <button
@@ -107,7 +107,7 @@ export default function CloudSyncModal({
               className="btn ghost"
               onClick={() => void onSignOut()}
             >
-              Sign Out
+              Sign out
             </button>
           )}
         </div>

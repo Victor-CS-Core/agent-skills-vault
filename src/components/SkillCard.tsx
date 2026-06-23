@@ -51,13 +51,13 @@ export default function SkillCard({ skill, onOpen, onDelete }: SkillCardProps) {
           }}
           aria-label={`Delete ${skill.name}`}
         >
-          x
+          ×
         </button>
       </div>
       <h3>{skill.name}</h3>
       <p>{skill.description || "No description available."}</p>
       <div className="meta">
-        <span>{skill.source}</span>
+        <span className="source-line">{skill.source}</span>
         <div className="meta-actions">
           {canCopyInstall && (
             <button

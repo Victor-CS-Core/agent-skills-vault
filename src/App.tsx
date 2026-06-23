@@ -80,12 +80,16 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="header">
-        <div className="brand">Skill Vault</div>
+        <div className="brand-block">
+          <div className="brand">Skill Vault</div>
+          <div className="brand-kicker">local agent library</div>
+        </div>
         <input
           className="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name, description, category"
+          placeholder="Find a skill, source, or trigger"
+          aria-label="Search skills"
         />
 
         <div className="header-actions">
@@ -110,10 +114,10 @@ export default function App() {
 
       <main className="main">
         <div className="toolbar">
-          <div>
+          <div className="count-readout">
             <strong>{filteredSkills.length}</strong> of {skills.length} skills
           </div>
-          <div className="segmented">
+          <div className="segmented" aria-label="View mode">
             <button
               className={viewMode === "card" ? "active" : ""}
               onClick={() => setViewMode("card")}
@@ -131,8 +135,8 @@ export default function App() {
 
         {sortedSkills.length === 0 ? (
           <section className="empty">
-            <h2>Your vault is empty</h2>
-            <p>Import from GitHub or add your own skill manually.</p>
+            <h2>No skills indexed</h2>
+            <p>Import a repository or save a markdown skill to start the vault.</p>
           </section>
         ) : (
           <section className={`grid ${viewMode}`}>
