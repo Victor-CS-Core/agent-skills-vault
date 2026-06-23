@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "best-practices": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/best-practices/SKILL.md",
+      "computedHash": "f84707a5ba30771f4c3e672846457e4b0ed4dff5fd268bf0fe6cd17583637671"
+    },
     "impeccable": {
       "source": "pbakaus/impeccable",
       "sourceType": "github",
