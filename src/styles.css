@@ -62,7 +62,15 @@ body {
   letter-spacing: -0.4px;
 }
 
-.search,
+.search {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
 .modal input,
 .modal textarea {
   width: 100%;
@@ -71,6 +79,7 @@ body {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
+  margin-bottom: 12px;
 }
 
 .search:focus-visible,
@@ -222,6 +231,7 @@ body {
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

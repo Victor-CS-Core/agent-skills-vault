@@ -4,13 +4,15 @@ import type { ImportResult, ParsedRepo, Skill } from "../types/skill";
 
 export function parseRepoUrl(input: string): ParsedRepo {
   const u = new URL(input);
-  if (u.hostname === "skills.sh") {
+  const hostname = u.hostname.startsWith("www.") ? u.hostname.slice(4) : u.hostname;
+
+  if (hostname === "skills.sh") {
     const p = u.pathname.split("/").filter(Boolean);
     if (p.length < 2) throw new Error("Invalid skills.sh URL");
     return { owner: p[0], repo: p[1], branch: "main" };
   }
 
-  if (u.hostname !== "github.com") {
+  if (hostname !== "github.com") {
     throw new Error("Only github.com and skills.sh URLs are supported");
   }
 

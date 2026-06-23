@@ -76,28 +76,37 @@ export default function ImportSkillModal({
         <hr />
 
         <h3>Add manually</h3>
+        <label>Skill Name</label>
         <input
           value={manualName}
           onChange={(e) => onManualNameChange(e.target.value)}
           placeholder="Skill name"
         />
+        <label>Description</label>
         <input
           value={manualDesc}
           onChange={(e) => onManualDescChange(e.target.value)}
           placeholder="Description"
         />
         <div className="row-2">
-          <input
-            value={manualCat}
-            onChange={(e) => onManualCatChange(e.target.value)}
-            placeholder="Category"
-          />
-          <input
-            value={manualSource}
-            onChange={(e) => onManualSourceChange(e.target.value)}
-            placeholder="Source"
-          />
+          <div>
+            <label>Category</label>
+            <input
+              value={manualCat}
+              onChange={(e) => onManualCatChange(e.target.value)}
+              placeholder="Category"
+            />
+          </div>
+          <div>
+            <label>Source</label>
+            <input
+              value={manualSource}
+              onChange={(e) => onManualSourceChange(e.target.value)}
+              placeholder="Source"
+            />
+          </div>
         </div>
+        <label>Skill Markdown Body</label>
         <textarea
           value={manualBody}
           onChange={(e) => onManualBodyChange(e.target.value)}
